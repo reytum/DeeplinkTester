@@ -1,0 +1,71 @@
+package com.deeplink_tester.data
+
+import com.deeplink_tester.domain.models.BaseUrl
+import com.deeplink_tester.domain.models.Category
+import com.deeplink_tester.domain.models.Deeplink
+import kotlinx.serialization.json.Json
+
+class DeeplinkProvider {
+    companion object {
+        const val URL_SCHEME = "https://"
+
+        fun getBaseUrls(): List<BaseUrl> {
+            return listOf(
+                BaseUrl(name = "QA AppLink", url = "app-link-np.kotaksecurities.com"),
+                BaseUrl(name = "QA Domain", url = "q-ntrade.kotaksecurities.online"),
+                BaseUrl(name = "QA One Link", url = "kneoqa.onelink.me"),
+                BaseUrl(name = "Prod AppLink", url = "app-link.kotaksecurities.com"),
+                BaseUrl(name = "Prod Domain", url = "neo.kotaksecurities.com"),
+                BaseUrl(name = "Prod One Link", url = "kneo.onelink.me"),
+            )
+        }
+
+        fun getDeepLinks(): List<Category> {
+            val map = Json.decodeFromString<Map<String, List<Deeplink>>>(deeplinkJson)
+            return map.map { (categoryName, deepLinks) ->
+                Category(
+                    name = categoryName,
+                    deepLinks = deepLinks
+                )
+            }
+        }
+    }
+}
+
+
+const val deeplinkJson = """{
+    "Post Landing Links": [
+    {
+        "name": "StockCase",
+        "url": "/stockcase"
+    },
+    {
+        "name": "StockCase Golden Opportunity Basket",
+        "url": "/stockcase/basket/uninvested/9e03e221-85f1-11ed-9667-02d27c588048"
+    },
+    {
+        "name": "Sipit",
+        "url": "/sipIt"
+    },
+    {
+        "name": "Sipit Listing",
+        "url": "/sipIt/listing"
+    },
+    {
+        "name": "Sipit IOC Page",
+        "url": "/sipIt/stock/NSE/IOC"
+    },
+    {
+        "name": "MutualFunds",
+        "url": "/mutualfunds"
+    }
+    ],
+    "Pre Login Links": [
+    {
+        "name": "NeoMobile",
+        "url": "/neomobile"
+    }
+    ],
+    "SIO Links": [],
+    "MKSAPI Links": []
+}"""
