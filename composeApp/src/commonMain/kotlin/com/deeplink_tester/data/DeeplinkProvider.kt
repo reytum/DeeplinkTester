@@ -33,7 +33,8 @@ class DeeplinkProvider {
 }
 
 
-const val deeplinkJson = """{
+const val deeplinkJson = """
+ {
     "Post Landing Links": [
     {
         "name": "StockCase",
@@ -56,8 +57,48 @@ const val deeplinkJson = """{
         "url": "/sipIt/stock/NSE/IOC"
     },
     {
-        "name": "MutualFunds",
-        "url": "/mutualfunds"
+        "name": "Mutual Fund",
+        "url": "/mutualfund"
+    },
+    {
+         "name": "Start SIP with 100",
+         "url": "/mutualfund/mutual-funds?fund_type_id=5"
+    },
+    {
+        "name": "Funds Page",
+        "url": "/funds"
+    },
+    {
+         "name": "Deposit Rs 500",
+         "url": "/deposit?amount=500"
+    },
+    {
+        "name": "Home Page Stocks",
+        "url": "/home?tab=stocks"
+    },
+    {
+        "name": "Home Page FNO",
+        "url": "/home?tab=fno" 
+    },
+    {
+        "name": "Invest Page",
+        "url": "/invest" 
+    },
+    {
+        "name": "Investment Ideas",
+        "url": "/investment-ideas"
+    },
+    {
+        "name": "Search Page with Query HDFC",
+        "url": "/home?searchQuery=HDFC"
+    },
+    {
+        "name": "Search Page LTP with Query HDFC",
+        "url": "/home?searchQueryV2=HDFC"
+    },
+    {
+        "name": "Watchlist Page",
+        "url": "/watchlist"
     }
     ],
     "Pre Login Links": [
@@ -66,6 +107,21 @@ const val deeplinkJson = """{
         "url": "/neomobile"
     }
     ],
-    "SIO Links": [],
-    "MKSAPI Links": []
-}"""
+    "SIO Links": [
+     {
+        "name": "Activate Trinity",
+        "url": "/sio/TRIN"
+     }
+    ],
+    "MKSAPI Links": [
+      {
+        "name": "Income Range Update",
+        "url": "/mksapi/irup"
+      },
+      {
+         "name": "Nest Trading terminal",
+         "url": "/nest-trading-terminal"
+      }
+    ]
+}
+"""
