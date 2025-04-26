@@ -1,4 +1,4 @@
-package com.deeplink_tester.domain.models
+package com.deeplink_tester.data.models
 
 import kotlinx.serialization.Serializable
 

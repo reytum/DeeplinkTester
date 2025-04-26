@@ -36,10 +36,12 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.deeplink_tester.data.DeeplinkProvider
-import com.deeplink_tester.domain.models.BaseUrl
-import com.deeplink_tester.domain.models.Category
-import com.deeplink_tester.domain.models.Deeplink
+import com.deeplink_tester.data.models.BaseUrl
+import com.deeplink_tester.data.models.Category
+import com.deeplink_tester.data.models.Deeplink
+import com.deeplink_tester.domain.viewmodel.DeeplinkViewModel
 import com.deeplink_tester.rememberPlatformState
 import multiplatform.network.cmptoast.showToast
 import org.jetbrains.compose.ui.tooling.preview.Preview
@@ -47,11 +49,14 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 @Preview
-fun App() {
+fun App(viewModel: DeeplinkViewModel = viewModel { DeeplinkViewModel() }) {
     MaterialTheme {
         val baseUrls = DeeplinkProvider.getBaseUrls()
         var expanded by remember { mutableStateOf(false) }
         var selectedItem by remember { mutableStateOf(baseUrls[0]) }
+        viewModel.fetchDeepLinks()
+
+        val state by viewModel.uiState.collectAsState()
 
         Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
             Text(
@@ -89,7 +94,7 @@ fun App() {
                     }
                 }
             }
-            ExpandableList(DeeplinkProvider.getDeepLinks(), selectedItem.url)
+            ExpandableList(state.categories, selectedItem.url)
         }
     }
 }

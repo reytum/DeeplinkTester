@@ -1,9 +1,6 @@
 package com.deeplink_tester.data
 
-import com.deeplink_tester.domain.models.BaseUrl
-import com.deeplink_tester.domain.models.Category
-import com.deeplink_tester.domain.models.Deeplink
-import kotlinx.serialization.json.Json
+import com.deeplink_tester.data.models.BaseUrl
 
 class DeeplinkProvider {
     companion object {
@@ -18,16 +15,6 @@ class DeeplinkProvider {
                 BaseUrl(name = "Prod Domain", url = "neo.kotaksecurities.com"),
                 BaseUrl(name = "Prod One Link", url = "kneo.onelink.me"),
             )
-        }
-
-        fun getDeepLinks(): List<Category> {
-            val map = Json.decodeFromString<Map<String, List<Deeplink>>>(deeplinkJson)
-            return map.map { (categoryName, deepLinks) ->
-                Category(
-                    name = categoryName,
-                    deepLinks = deepLinks
-                )
-            }
         }
     }
 }
