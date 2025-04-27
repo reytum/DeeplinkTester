@@ -1,4 +1,6 @@
+import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.kotlin.gradle.targets.js.webpack.KotlinWebpackConfig
 
 val ktorVersion: String by project
 
@@ -17,6 +19,26 @@ kotlin {
         }
     }
 
+    @OptIn(ExperimentalWasmDsl::class)
+    wasmJs {
+        outputModuleName = "deeplinkTester"
+        browser {
+            val rootDirPath = project.rootDir.path
+            val projectDirPath = project.projectDir.path
+            commonWebpackConfig {
+                outputFileName = "deeplinkTester.js"
+                devServer = (devServer ?: KotlinWebpackConfig.DevServer()).apply {
+                    static = (static ?: mutableListOf()).apply {
+                        // Serve sources to debug inside browser
+                        add(rootDirPath)
+                        add(projectDirPath)
+                    }
+                }
+            }
+        }
+        binaries.executable()
+    }
+
     listOf(
         iosX64(),
         iosArm64(),
@@ -33,6 +55,7 @@ kotlin {
             implementation(compose.preview)
             implementation(libs.androidx.activity.compose)
             implementation(libs.ktor.client.cio)
+            implementation(libs.cmptoast)
         }
         commonMain.dependencies {
             implementation(compose.runtime)
@@ -43,14 +66,14 @@ kotlin {
             implementation(compose.components.uiToolingPreview)
             implementation(libs.androidx.lifecycle.viewmodel)
             implementation(libs.androidx.lifecycle.runtime.compose)
-            implementation(libs.cmptoast)
-            implementation(libs.kotlinx.serialization.json.v181)
+            implementation(libs.kotlinx.serialization.json)
             implementation(libs.lifecycle.viewmodel.compose)
             implementation(libs.kotlinx.coroutines.core)
             implementation(libs.ktor.client.core)
         }
         iosMain.dependencies {
             implementation(libs.ktor.client.darwin)
+            implementation(libs.cmptoast)
         }
     }
 }
@@ -85,7 +108,7 @@ android {
 dependencies {
     implementation(libs.listenablefuture)
     implementation(libs.androidx.material3.android)
-    implementation(libs.androidx.foundation.layout.android)
+    implementation(libs.androidx.foundation.android)
     implementation(libs.androidx.ui.text.android)
     implementation(libs.androidx.compiler)
     implementation(libs.androidx.foundation.android)

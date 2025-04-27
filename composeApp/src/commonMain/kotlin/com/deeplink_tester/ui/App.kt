@@ -1,6 +1,7 @@
 package com.deeplink_tester.ui
 
 import androidx.compose.animation.animateContentSize
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -21,11 +22,13 @@ import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
+import androidx.compose.material.TextField
+import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.filled.ThumbUp
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -43,7 +46,7 @@ import com.deeplink_tester.data.models.Category
 import com.deeplink_tester.data.models.Deeplink
 import com.deeplink_tester.domain.viewmodel.DeeplinkViewModel
 import com.deeplink_tester.rememberPlatformState
-import multiplatform.network.cmptoast.showToast
+//import multiplatform.network.cmptoast.showToast
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -51,9 +54,13 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 @Preview
 fun App(viewModel: DeeplinkViewModel = viewModel { DeeplinkViewModel() }) {
     MaterialTheme {
-        val baseUrls = DeeplinkProvider.getBaseUrls()
+        val isWeb = rememberPlatformState().getPlatform() == "Web"
+        val baseUrls = DeeplinkProvider.getBaseUrls(isWeb)
         var expanded by remember { mutableStateOf(false) }
         var selectedItem by remember { mutableStateOf(baseUrls[0]) }
+        var selectedBaseUrl by remember { mutableStateOf("${DeeplinkProvider.URL_SCHEME}${selectedItem.url}") }
+        var port by remember { mutableStateOf("") }
+
         viewModel.fetchDeepLinks()
 
         val state by viewModel.uiState.collectAsState()
@@ -67,34 +74,63 @@ fun App(viewModel: DeeplinkViewModel = viewModel { DeeplinkViewModel() }) {
                     fontWeight = FontWeight.Bold
                 )
             )
-            ExposedDropdownMenuBox(
-                expanded = expanded,
-                onExpandedChange = { expanded = !expanded }
-            ) {
-                OutlinedTextField(
-                    value = selectedItem.name,
-                    onValueChange = {},
-                    readOnly = true,
-                    label = { Text("Select Base Url", style = TextStyle(fontSize = 16.sp)) },
-                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-                    modifier = Modifier.padding(PaddingValues(top = 8.dp))
-                )
-
-                ExposedDropdownMenu(
+            Row {
+                ExposedDropdownMenuBox(
                     expanded = expanded,
-                    onDismissRequest = { expanded = false }
+                    onExpandedChange = { expanded = !expanded }
                 ) {
-                    baseUrls.forEach { item ->
-                        DropdownMenuItem(
-                            onClick = {
-                                selectedItem = item
-                                expanded = false
-                            },
-                        ) { DropdownTextColumn(item) }
+                    OutlinedTextField(
+                        value = selectedItem.name,
+                        onValueChange = {},
+                        readOnly = true,
+                        label = { Text("Select Base Url", style = TextStyle(fontSize = 16.sp)) },
+                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+                        modifier = Modifier.padding(PaddingValues(top = 8.dp))
+                    )
+
+                    ExposedDropdownMenu(
+                        expanded = expanded,
+                        onDismissRequest = { expanded = false }
+                    ) {
+                        baseUrls.forEach { item ->
+                            DropdownMenuItem(
+                                onClick = {
+                                    selectedItem = item
+                                    selectedBaseUrl =
+                                        if (selectedItem.isLocalhost()) item.url else "${DeeplinkProvider.LOCALHOST_SCHEME}${item.url}"
+                                    expanded = false
+                                },
+                            ) { DropdownTextColumn(item) }
+                        }
                     }
                 }
+                if (isWeb && selectedItem.isLocalhost()) {
+                    Spacer(modifier = Modifier.padding(horizontal = 8.dp))
+                    OutlinedTextField(
+                        value = port,
+                        onValueChange = {
+                            if (it.length <= DeeplinkProvider.PORT_LENGTH) {
+                                val intPort = it.toIntOrNull()
+                                if (intPort != null || it.isEmpty()) {
+                                    port = it
+                                }
+                                if (it.length == DeeplinkProvider.PORT_LENGTH) {
+                                    val split = selectedBaseUrl.split(":")
+                                    selectedBaseUrl = if (split.size > 1) {
+                                        "${split[0]}:${it}"
+                                    } else {
+                                        "$selectedBaseUrl:${it}"
+                                    }
+                                }
+                            }
+                        },
+                        readOnly = false,
+                        label = { Text("Enter the PORT", style = TextStyle(fontSize = 16.sp)) },
+                        modifier = Modifier.padding(PaddingValues(top = 8.dp))
+                    )
+                }
             }
-            ExpandableList(state.categories, selectedItem.url)
+            ExpandableList(state.categories, selectedBaseUrl)
         }
     }
 }
@@ -129,12 +165,12 @@ fun ExpandableListItemView(item: Category, baseUrl: String) {
             .animateContentSize(),
         elevation = 4.dp
     ) {
-        Column(modifier = Modifier.padding(8.dp).clickable(true, onClick = {
-            expanded = !expanded
-        })) {
+        Column(modifier = Modifier.padding(8.dp)) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth().clickable(true, onClick = {
+                    expanded = !expanded
+                })
             ) {
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
@@ -149,14 +185,20 @@ fun ExpandableListItemView(item: Category, baseUrl: String) {
             }
             Spacer(modifier = Modifier.padding(vertical = 8.dp))
             if (expanded) {
-                DeeplinkListView(items = item.deepLinks, baseUrl = baseUrl)
+                DeeplinkListView(
+                    items = item.deepLinks,
+                    baseUrl = baseUrl,
+                )
             }
         }
     }
 }
 
 @Composable
-fun DeeplinkListView(items: List<Deeplink>, baseUrl: String) {
+fun DeeplinkListView(
+    items: List<Deeplink>,
+    baseUrl: String,
+) {
     val count = items.size
     val clipboardManager = LocalClipboardManager.current
     val platformState = rememberPlatformState()
@@ -165,7 +207,10 @@ fun DeeplinkListView(items: List<Deeplink>, baseUrl: String) {
     ) {
         items(count) { index ->
             val deeplink = items[index]
-            val absoluteUrl = "${DeeplinkProvider.URL_SCHEME}${baseUrl}${deeplink.url}"
+            var absoluteUrl by remember(
+                baseUrl,
+                deeplink.url
+            ) { mutableStateOf("${baseUrl}${deeplink.url}") }
 
             Row {
                 Column(
@@ -175,19 +220,37 @@ fun DeeplinkListView(items: List<Deeplink>, baseUrl: String) {
                     Text(
                         text = deeplink.name,
                         style = TextStyle(
-                            fontSize = 14.sp,
+                            fontSize = 16.sp,
                             color = Color.Black,
                             fontWeight = FontWeight.Bold
                         )
                     )
-                    Text(
-                        text = absoluteUrl,
-                        style = TextStyle(fontSize = 16.sp)
+                    TextField(
+                        value = absoluteUrl,
+                        onValueChange = {
+                            absoluteUrl = if (!absoluteUrl.startsWith("${baseUrl}/")) {
+                                "${baseUrl}/"
+                            } else {
+                                it
+                            }
+                        },
+                        textStyle = TextStyle(
+                            fontSize = 14.sp,
+                            color = Color.Black
+                        ),
+                        colors = TextFieldDefaults.textFieldColors(
+                            backgroundColor = Color.White,
+                            cursorColor = MaterialTheme.colors.primary,
+                            focusedIndicatorColor = Color.Transparent,
+                            unfocusedIndicatorColor = Color.Transparent
+                        ),
+                        modifier = Modifier
+                            .background(Color.White)
                     )
                     Divider(
                         color = Color.Gray,
                         thickness = 1.dp,
-                        modifier = Modifier.padding(vertical = 8.dp)
+                        modifier = Modifier.padding(bottom = 8.dp)
                     )
                 }
                 Row(
@@ -203,10 +266,10 @@ fun DeeplinkListView(items: List<Deeplink>, baseUrl: String) {
                     }
                     IconButton(onClick = {
                         clipboardManager.setText(AnnotatedString(absoluteUrl))
-                        showToast("Copied to clipboard")
+                        //showToast("Copied to clipboard")
                     }) {
                         Icon(
-                            imageVector = Icons.Default.ThumbUp,
+                            imageVector = Icons.Default.Share,
                             contentDescription = "CopyDeeplink",
                             tint = MaterialTheme.colors.primary
                         )

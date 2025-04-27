@@ -5,9 +5,11 @@ import com.deeplink_tester.data.models.BaseUrl
 class DeeplinkProvider {
     companion object {
         const val URL_SCHEME = "https://"
+        const val LOCALHOST_SCHEME = "http://"
+        const val PORT_LENGTH = 5
 
-        fun getBaseUrls(): List<BaseUrl> {
-            return listOf(
+        fun getBaseUrls(isWeb: Boolean): List<BaseUrl> {
+            val genericList = mutableListOf(
                 BaseUrl(name = "QA AppLink", url = "app-link-np.kotaksecurities.com"),
                 BaseUrl(name = "QA Domain", url = "q-ntrade.kotaksecurities.online"),
                 BaseUrl(name = "QA One Link", url = "kneoqa.onelink.me"),
@@ -15,6 +17,10 @@ class DeeplinkProvider {
                 BaseUrl(name = "Prod Domain", url = "neo.kotaksecurities.com"),
                 BaseUrl(name = "Prod One Link", url = "kneo.onelink.me"),
             )
+            if (isWeb) {
+                genericList.add(BaseUrl(name = "Localhost", url = "localhost"))
+            }
+            return genericList
         }
     }
 }

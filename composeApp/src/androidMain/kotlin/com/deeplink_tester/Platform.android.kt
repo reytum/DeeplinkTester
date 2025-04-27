@@ -13,6 +13,9 @@ internal class AndroidPlatformState(private val context: Context) : PlatformStat
         context.startActivity(Intent(Intent.ACTION_VIEW, deeplink.toUri()))
     }
 
+    override fun getPlatform(): String {
+        return "Android"
+    }
 }
 
 @Composable

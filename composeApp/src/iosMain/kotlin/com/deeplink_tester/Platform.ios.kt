@@ -12,6 +12,10 @@ class IOSPlatformState : PlatformState {
             }
         }
     }
+
+    override fun getPlatform(): String {
+        return "iOS"
+    }
 }
 
 @Composable

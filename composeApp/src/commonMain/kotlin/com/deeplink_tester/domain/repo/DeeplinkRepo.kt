@@ -8,13 +8,18 @@ import kotlinx.serialization.json.Json
 
 object DeeplinkRepo {
     fun getInitialDeepLinks(): List<Category> {
-        val map = Json.decodeFromString<Map<String, List<Deeplink>>>(deeplinkJson)
-        return map.map { (categoryName, deepLinks) ->
-            Category(
-                name = categoryName,
-                deepLinks = deepLinks
-            )
+        try {
+            val map = Json.decodeFromString<Map<String, List<Deeplink>>>(deeplinkJson)
+            return map.map { (categoryName, deepLinks) ->
+                Category(
+                    name = categoryName,
+                    deepLinks = deepLinks
+                )
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
+        return listOf()
     }
 
     suspend fun fetchDeepLinks(): List<Category> {
