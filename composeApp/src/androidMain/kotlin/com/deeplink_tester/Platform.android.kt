@@ -16,6 +16,10 @@ internal class AndroidPlatformState(private val context: Context) : PlatformStat
     override fun getPlatform(): String {
         return "Android"
     }
+
+    override fun isMobileBrowser(): Boolean {
+        return false
+    }
 }
 
 @Composable

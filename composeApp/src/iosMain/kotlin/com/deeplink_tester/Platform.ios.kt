@@ -16,6 +16,10 @@ class IOSPlatformState : PlatformState {
     override fun getPlatform(): String {
         return "iOS"
     }
+
+    override fun isMobileBrowser(): Boolean {
+        return false
+    }
 }
 
 @Composable

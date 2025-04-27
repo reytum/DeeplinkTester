@@ -6,6 +6,8 @@ interface PlatformState {
     fun launchDeeplink(deeplink: String)
 
     fun getPlatform(): String
+
+    fun isMobileBrowser(): Boolean
 }
 
 @Composable

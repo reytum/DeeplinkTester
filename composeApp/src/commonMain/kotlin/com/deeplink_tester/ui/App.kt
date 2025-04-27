@@ -54,16 +54,18 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 @Preview
 fun App(viewModel: DeeplinkViewModel = viewModel { DeeplinkViewModel() }) {
     MaterialTheme {
-        val isWeb = rememberPlatformState().getPlatform() == "Web"
+        val isWeb = !rememberPlatformState().isMobileBrowser()
         val baseUrls = DeeplinkProvider.getBaseUrls(isWeb)
         var expanded by remember { mutableStateOf(false) }
         var selectedItem by remember { mutableStateOf(baseUrls[0]) }
         var selectedBaseUrl by remember { mutableStateOf("${DeeplinkProvider.URL_SCHEME}${selectedItem.url}") }
         var port by remember { mutableStateOf("") }
 
-        viewModel.fetchDeepLinks()
-
         val state by viewModel.uiState.collectAsState()
+
+        if (!state.isUpdateReceived) {
+            viewModel.fetchDeepLinks()
+        }
 
         Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
             Text(
@@ -97,7 +99,7 @@ fun App(viewModel: DeeplinkViewModel = viewModel { DeeplinkViewModel() }) {
                                 onClick = {
                                     selectedItem = item
                                     selectedBaseUrl =
-                                        if (selectedItem.isLocalhost()) item.url else "${DeeplinkProvider.LOCALHOST_SCHEME}${item.url}"
+                                        if (selectedItem.isLocalhost()) item.url else "${DeeplinkProvider.URL_SCHEME}${item.url}"
                                     expanded = false
                                 },
                             ) { DropdownTextColumn(item) }

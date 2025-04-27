@@ -21,7 +21,8 @@ class DeeplinkViewModel : ViewModel() {
             if (data.isNotEmpty()) {
                 //showToast("Deeplinks updated from remote")
                 _state.value = DeeplinkState(
-                    categories = data
+                    categories = data,
+                    isUpdateReceived = true
                 )
             }
         }
@@ -49,5 +50,6 @@ class DeeplinkViewModel : ViewModel() {
 }
 
 data class DeeplinkState(
-    val categories: List<Category> = DeeplinkRepo.getInitialDeepLinks()
+    val categories: List<Category> = DeeplinkRepo.getInitialDeepLinks(),
+    val isUpdateReceived: Boolean = false
 )
