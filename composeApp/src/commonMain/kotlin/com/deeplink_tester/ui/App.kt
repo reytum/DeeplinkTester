@@ -54,7 +54,9 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 @Preview
 fun App(viewModel: DeeplinkViewModel = viewModel { DeeplinkViewModel() }) {
     MaterialTheme {
-        val isWeb = !rememberPlatformState().isMobileBrowser()
+        val isWeb =
+            rememberPlatformState().getPlatform() == "Web" && !rememberPlatformState().isMobileBrowser()
+
         val baseUrls = DeeplinkProvider.getBaseUrls(isWeb)
         var expanded by remember { mutableStateOf(false) }
         var selectedItem by remember { mutableStateOf(baseUrls[0]) }
@@ -64,7 +66,7 @@ fun App(viewModel: DeeplinkViewModel = viewModel { DeeplinkViewModel() }) {
         val state by viewModel.uiState.collectAsState()
 
         if (!state.isUpdateReceived) {
-            viewModel.fetchDeepLinks()
+            viewModel.fetchDeepLinks(rememberPlatformState())
         }
 
         Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {

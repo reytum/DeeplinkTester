@@ -100,12 +100,6 @@ const val deeplinkJson = """
         "url": "/neomobile"
     }
     ],
-    "SIO Links": [
-     {
-        "name": "Activate Trinity",
-        "url": "/sio/TRIN"
-     }
-    ],
     "MKSAPI Links": [
       {
         "name": "Income Range Update",
@@ -115,6 +109,12 @@ const val deeplinkJson = """
          "name": "Nest Trading terminal",
          "url": "/nest-trading-terminal"
       }
+    ],
+    "SIO Links": [
+     {
+        "name": "Activate Trinity",
+        "url": "/sio/TRIN"
+     }
     ]
 }
 """

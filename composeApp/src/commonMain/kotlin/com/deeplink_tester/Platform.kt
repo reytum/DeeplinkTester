@@ -8,6 +8,10 @@ interface PlatformState {
     fun getPlatform(): String
 
     fun isMobileBrowser(): Boolean
+
+    fun saveSettings(setting: String, key: String)
+
+    fun getSettings(key: String): String?
 }
 
 @Composable
