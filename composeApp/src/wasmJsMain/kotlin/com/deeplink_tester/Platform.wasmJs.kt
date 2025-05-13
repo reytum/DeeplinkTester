@@ -5,7 +5,7 @@ import kotlinx.browser.window
 
 class WasmPlatformState : PlatformState {
     override fun launchDeeplink(deeplink: String) {
-        val openedWindow = window.open(deeplink)
+        val openedWindow = window.open("")?.apply { location.href = deeplink }
         val platform = getBrowserPlatform()
 /*
         if ((platform == "iPhone" || platform == "iPad" || platform == "Web") && (openedWindow?.location?.href == null || openedWindow.location.href == "about:blank")) {

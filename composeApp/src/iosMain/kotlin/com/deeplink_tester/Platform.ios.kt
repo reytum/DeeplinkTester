@@ -7,9 +7,14 @@ import platform.UIKit.UIApplication
 
 class IOSPlatformState : PlatformState {
     override fun launchDeeplink(deeplink: String) {
+
         NSURL.URLWithString(deeplink)?.let {
             if (UIApplication.sharedApplication().canOpenURL(it)) {
-                UIApplication.sharedApplication().openURL(url = it)
+                UIApplication.sharedApplication.openURL(
+                    url = it,
+                    options = emptyMap<Any?, Any>(),
+                    completionHandler = null
+                )
             }
         }
     }
