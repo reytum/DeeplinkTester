@@ -1,0 +1,56 @@
+trigger:
+  - master
+
+pool:
+  name: AWS-VSTS-AGENTS
+  demands:
+    - CI
+
+variables:
+- group: git_pat_ci
+- name: tag
+  value: '1.0.$(Build.BuildId)'
+
+jobs:
+- job: checkmarx_scan
+  displayName: Checkmarx Scan
+  dependsOn: []  # ✅ Always run regardless of make ci result
+  condition: always()
+  steps:
+    - script: |
+        echo "Downloading the latest SCAResolver binary"
+        rm -rf /home/ubuntu/myagent/_work/ScaResolver
+        wget -O /tmp/ScaResolver-linux64.tar.gz https://sca-downloads.s3.amazonaws.com/cli/latest/ScaResolver-linux64.tar.gz
+        tar -xzf /tmp/ScaResolver-linux64.tar.gz -C /home/ubuntu/myagent/_work/
+        ls -l /home/ubuntu/myagent/_work/ScaResolver
+      displayName: 'Download and Extracted SCAResolver'
+
+    - script: mkdir -p cx-results-deeplink-tester/scan_results
+      displayName: 'Ensure Output Directory Exists'
+
+    - task: Checkmarx AST@3
+      displayName: Run Checkmarx Scan
+      inputs:
+        CheckmarxService: 'Checkmarx'
+        projectName: 'deeplink-tester'
+        branchName: 'master'
+        tenantName: 'kotaksecuritiesltd'
+        additionalParams: '--sast-fast-scan=true --report-format json --output-path cx-results-deeplink-tester/scan_results --sca-resolver /home/ubuntu/myagent/_work/ScaResolver --debug'
+
+    - script: sudo apt-get install -y jq
+      displayName: 'Installing jq'
+
+    - script: |
+        echo "Listing files to verify JSON location:"
+        find . -name "*.json"
+
+        RESULTS_FILE="cx-results-deeplink-tester/scan_results/cx_result.json"
+
+        if [ -f "$RESULTS_FILE" ]; then
+          echo "Printing Checkmarx results:"
+          cat "$RESULTS_FILE" | jq '.'
+        else
+          echo "Error: Checkmarx results file not found!"
+          exit 1
+        fi
+      displayName: 'Debug Checkmarx Scan Output'
