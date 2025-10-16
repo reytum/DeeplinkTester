@@ -35,7 +35,7 @@ jobs:
         projectName: 'deeplink-tester'
         branchName: 'master'
         tenantName: 'kotaksecuritiesltd'
-        additionalParams: '--sast-fast-scan=true --report-format json --output-path cx-results-deeplink-tester/scan_results --sca-resolver /home/ubuntu/myagent/_work/ScaResolver --debug'
+        additionalParams: '--sast-fast-scan=true --sast-incremental=false --report-format json --output-path cx-results-deeplink-tester/scan_results --sca-resolver /home/ubuntu/myagent/_work/ScaResolver --debug'
 
     - script: sudo apt-get install -y jq
       displayName: 'Installing jq'
