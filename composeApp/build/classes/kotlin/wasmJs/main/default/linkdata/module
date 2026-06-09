@@ -1,0 +1,2 @@
+
+<DeeplinkTester:composeApp>:com.deeplink_tester:com.deeplink_tester.data:com.deeplink_tester.data.models: com.deeplink_tester.data.network:com.deeplink_tester.domain.repo:$com.deeplink_tester.domain.viewmodel:com.deeplink_tester.ui:-deeplinktester.composeapp.generated.resources
