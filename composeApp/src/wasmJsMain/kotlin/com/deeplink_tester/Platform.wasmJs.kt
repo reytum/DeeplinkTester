@@ -5,12 +5,17 @@ import kotlinx.browser.window
 
 class WasmPlatformState : PlatformState {
     override fun launchDeeplink(deeplink: String) {
-        val openedWindow = window.open("")?.apply { location.href = deeplink }
-        val platform = getBrowserPlatform()
-/*
-        if ((platform == "iPhone" || platform == "iPad" || platform == "Web") && (openedWindow?.location?.href == null || openedWindow.location.href == "about:blank")) {
-            openedWindow?.alert(openedWindow.location.toString())
-        }*/
+        if (isMobileBrowser()) {
+            // On mobile browsers, navigate the current window directly.
+            // This allows the OS to intercept the navigation and open the
+            // respective native app via Universal Links (iOS) or App Links (Android).
+            window.location.href = deeplink
+        } else {
+            // On desktop browsers, open in a new tab directly with the URL.
+            // Using window.open(url) instead of opening blank then setting href
+            // ensures proper handling of the link.
+            window.open(deeplink, "_blank")
+        }
     }
 
     override fun getPlatform(): String {

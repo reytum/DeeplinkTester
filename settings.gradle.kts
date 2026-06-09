@@ -1,6 +1,3 @@
-rootProject.name = "DeeplinkTester"
-enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
-
 pluginManagement {
     repositories {
         google {
@@ -14,6 +11,9 @@ pluginManagement {
         gradlePluginPortal()
     }
 }
+
+rootProject.name = "DeeplinkTester"
+enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
 dependencyResolutionManagement {
     repositories {
