@@ -8,7 +8,9 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
+  pages: write
+  id-token: write
 
 concurrency:
   group: "pages"
@@ -17,6 +19,9 @@ concurrency:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -33,29 +38,14 @@ jobs:
       - name: Build wasmJs production distribution
         run: ./gradlew :composeApp:wasmJsBrowserDistribution
 
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: composeApp/build/dist/wasmJs/productionExecutable
+
       - name: Deploy to GitHub Pages
-        run: |
-          # Configure git
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-
-          # Create a fresh gh-pages branch
-          git checkout --orphan gh-pages-temp
-
-          # Remove all tracked files
-          git rm -rf .
-
-          # Copy the built distribution files
-          cp -r composeApp/build/dist/wasmJs/productionExecutable/* .
-
-          # Stage all the new files
-          git add -A
-
-          # Check if there are changes to commit
-          if git diff --staged --quiet; then
-            echo "No changes to commit"
-          else
-            git commit -m "Deploy from ${{ github.sha }}"
-            git push origin gh-pages-temp:gh-pages --force
-          fi
-
+        id: deployment
+        uses: actions/deploy-pages@v4
